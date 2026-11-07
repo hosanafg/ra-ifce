@@ -1,0 +1,6 @@
+old/
+.vscode
+testes_locais/
+logs/
+.env
+__pycache__/
