@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from app.core.exceptions import AuthError
 from app.db import models  # noqa: F401  (registra os modelos antes do create_all)
 from app.db.session import Base, engine
-from app.routers import login, signup, reset
+from app.routers import login, signup, reset, alimentos, ocr
 
 logging.basicConfig(level=logging.INFO)
 Base.metadata.create_all(engine)
@@ -31,3 +31,5 @@ async def auth_error_handler(_: Request, exc: AuthError):
 app.include_router(login.router)
 app.include_router(signup.router)
 app.include_router(reset.router)
+app.include_router(alimentos.router)
+app.include_router(ocr.router)

@@ -52,7 +52,7 @@ export default function LoginPage() {
       const res = await loginPassword(loginToken, password)
       if (res.authenticated) {
         login({ email: res.email })
-        navigate('/')
+        navigate('/calendario')
       }
     } catch (err: any) {
       const detail = err?.detail

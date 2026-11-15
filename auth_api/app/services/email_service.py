@@ -42,3 +42,5 @@ def send_reset_email(to: str, token: str, frontend_url: str = "http://localhost:
         s.starttls()
         s.login(config.SMTP_USER, config.SMTP_PASSWORD)
         s.send_message(msg)
+
+print(repr(config.SMTP_HOST), repr(config.SMTP_PORT))

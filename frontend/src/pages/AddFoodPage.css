@@ -1,0 +1,162 @@
+/* ── AddFoodPage ── */
+
+.addfood-page {
+  min-height: 100vh;
+  background: var(--bg-page);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navbar */
+.addfood-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: 4rem;
+  background: var(--bg-nav);
+  color: var(--bg-nav-text);
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.addfood-nav-left { display: flex; align-items: center; gap: 1rem; }
+.addfood-nav-right { display: flex; align-items: center; gap: 1rem; }
+.addfood-nav-logo { font-size: 1.1rem; font-weight: 700; color: var(--bg-nav-text); }
+.addfood-nav-user { font-size: var(--font-size-sm); color: var(--bg-nav-text); opacity: 0.75; }
+
+/* Container */
+.addfood-container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  width: 100%;
+}
+.addfood-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.75rem;
+}
+.addfood-section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-default);
+  padding-bottom: 0.4rem;
+}
+
+/* OCR Section */
+.addfood-ocr-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.addfood-dropzone {
+  border: 2px dashed var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+.addfood-dropzone:hover,
+.addfood-dropzone.dragging {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--text-primary);
+}
+.addfood-file-preview {
+  font-weight: 600;
+  color: var(--accent);
+  font-size: var(--font-size-base);
+}
+
+.addfood-alert {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+.addfood-alert-warning {
+  background: #fff9e6;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+.addfood-alert-error {
+  background: var(--error-bg);
+  color: var(--error);
+  border: 1px solid color-mix(in srgb, var(--error) 30%, transparent);
+}
+[data-theme="dark"] .addfood-alert-warning {
+  background: #3d2f00;
+  color: #ffc107;
+  border-color: #856404;
+}
+
+/* Form section */
+.addfood-form-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+.addfood-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+.addfood-peso-row {
+  display: flex;
+  gap: 0.6rem;
+}
+.addfood-peso-unit {
+  width: 90px;
+  flex-shrink: 0;
+}
+.addfood-inline-new {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.addfood-form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Toast */
+.addfood-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  box-shadow: var(--shadow-md);
+  z-index: 9999;
+  animation: fadeInUp 0.3s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
