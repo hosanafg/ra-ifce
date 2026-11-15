@@ -21,3 +21,24 @@ def send_code_email(to: str, code: str) -> None:
         s.starttls()
         s.login(config.SMTP_USER, config.SMTP_PASSWORD)
         s.send_message(msg)
+
+
+def send_reset_email(to: str, token: str, frontend_url: str = "http://localhost:5173") -> None:
+    """Envia o link de redefinição de senha."""
+    link = f"{frontend_url}/nova-senha?token={token}"
+    if not config.SMTP_HOST:
+        log.info("[DEV] Link de recuperação para %s: %s", to, link)
+        return
+    msg = EmailMessage()
+    msg["Subject"] = "Redefinição de senha"
+    msg["From"] = config.SMTP_FROM
+    msg["To"] = to
+    msg.set_content(
+        f"Clique no link abaixo para redefinir sua senha:\n\n{link}\n\n"
+        f"O link expira em {config.RESET_TOKEN_TTL // 60} minutos.\n"
+        "Se você não solicitou isso, ignore este e-mail."
+    )
+    with smtplib.SMTP(config.SMTP_HOST, config.SMTP_PORT) as s:
+        s.starttls()
+        s.login(config.SMTP_USER, config.SMTP_PASSWORD)
+        s.send_message(msg)

@@ -1,0 +1,215 @@
+/* ── Navbar da HomePage ── */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 4rem;
+  background-color: var(--bg-nav);
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--bg-nav-text);
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+}
+
+.navbar-logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background-color: var(--moss-400);
+  color: var(--warm-900);
+  border-radius: var(--radius-sm);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background-color: rgba(255,255,255,0.08);
+  color: var(--bg-nav-text);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.navbar-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: var(--moss-400);
+  color: var(--warm-900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* ── Hero ── */
+.home-hero {
+  padding: 5rem 2rem 4rem;
+  text-align: center;
+  background: linear-gradient(160deg, var(--bg-page) 60%, var(--accent-light) 100%);
+}
+
+.home-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.home-hero-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--text-primary);
+  margin-bottom: 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+.home-hero-title span { color: var(--accent); }
+
+.home-hero-subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  max-width: 540px;
+  margin: 0 auto 2.25rem;
+  line-height: 1.6;
+}
+
+.home-hero-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── Seção de features ── */
+.home-section {
+  padding: 4rem 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.home-section-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.home-section-sub {
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 2.5rem;
+  font-size: var(--font-size-base);
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.feature-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform .2s, box-shadow .2s;
+}
+.feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.feature-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-md);
+  background-color: var(--accent-light);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.feature-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+}
+
+.feature-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ── Stats strip ── */
+.stats-strip {
+  background-color: var(--accent);
+  color: var(--accent-text);
+  padding: 2.5rem 2rem;
+}
+.stats-inner {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+.stat-num {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.stat-label { font-size: var(--font-size-sm); opacity: 0.85; font-weight: 500; }
+
+/* ── CTA ── */
+.cta-section {
+  padding: 4rem 2rem;
+  text-align: center;
+  background-color: var(--bg-surface-alt);
+  border-top: 1px solid var(--border-default);
+}
+.cta-title { font-size: var(--font-size-2xl); font-weight: 700; margin-bottom: 0.6rem; }
+.cta-sub { color: var(--text-muted); margin-bottom: 2rem; }
+
+/* ── Footer ── */
+.home-footer {
+  background-color: var(--bg-nav);
+  color: var(--bg-nav-text);
+  padding: 2rem;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  opacity: 0.85;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
