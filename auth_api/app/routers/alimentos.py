@@ -1,4 +1,4 @@
-"""Router: alimentos, fornecedores, cardápio, desperdício e stats."""
+﻿"""Router: alimentos, fornecedores, cardápio, desperdício e stats."""
 from datetime import date, datetime, timezone
 from typing import List, Optional
 
@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.db.models import Alimento, CardapioItem, Fornecedor, LogDesperdicio
+from app.db.models import Alimento, CardapioItem, Fornecedor, LogDesperdicio, Receita
 from app.db.session import get_db
 from app.schemas.alimento import (
     AlimentoIn, AlimentoOut,
@@ -14,10 +14,49 @@ from app.schemas.alimento import (
     DesperdicioPorDia,
     FornecedorIn, FornecedorOut,
     LogDesperdicioIn, LogDesperdicioOut,
+    ReceitaIn, ReceitaOut,
     StatsOut,
 )
 
 router = APIRouter(tags=["alimentos"])
+
+# Unidade de peso armazenada: apenas "kg" ou "L" (converte g/mg/ml se necessário)
+_UNIDADES = {
+    "kg": (1, "kg"), "g": (0.001, "kg"), "gr": (0.001, "kg"), "mg": (0.000001, "kg"),
+    "l": (1, "L"), "lt": (1, "L"), "ml": (0.001, "L"),
+}
+
+
+def _normalizar_peso(dados: dict) -> dict:
+    un = (dados.get("peso_unidade") or "").strip().lower()
+    if un:
+        if un not in _UNIDADES:
+            raise HTTPException(status_code=422, detail="Unidade inválida. Use kg ou L.")
+        fator, final = _UNIDADES[un]
+        if dados.get("peso_valor") is not None:
+            dados["peso_valor"] = round(dados["peso_valor"] * fator, 3)
+        dados["peso_unidade"] = final
+    return dados
+
+
+# ── Receitas ──────────────────────────────────────────────────────────────────
+
+@router.get("/receitas", response_model=List[ReceitaOut])
+def listar_receitas(db: Session = Depends(get_db)):
+    return db.query(Receita).order_by(Receita.id.desc()).all()
+
+
+@router.post("/receitas", response_model=ReceitaOut, status_code=201)
+def criar_receita(body: ReceitaIn, db: Session = Depends(get_db)):
+    if body.refeicao not in ("cafe", "almoco", "lanche", "jantar"):
+        raise HTTPException(status_code=422, detail="Refeição inválida.")
+    obj = Receita(nome=body.nome.strip(), refeicao=body.refeicao, data=body.data)
+    db.add(obj)
+    if body.data:   # a receita aparece no calendário do dia
+        db.add(CardapioItem(data=body.data, tipo_refeicao=body.refeicao, descricao=obj.nome))
+    db.commit()
+    db.refresh(obj)
+    return obj
 
 
 # ── Fornecedores ──────────────────────────────────────────────────────────────
@@ -48,7 +87,7 @@ def listar_alimentos(db: Session = Depends(get_db)):
 
 @router.post("/alimentos", response_model=AlimentoOut, status_code=201)
 def criar_alimento(body: AlimentoIn, db: Session = Depends(get_db)):
-    obj = Alimento(**body.dict())
+    obj = Alimento(**_normalizar_peso(body.dict()))
     db.add(obj)
     db.commit()
     db.refresh(obj)
@@ -60,7 +99,7 @@ def atualizar_alimento(alimento_id: int, body: AlimentoIn, db: Session = Depends
     obj = db.query(Alimento).filter(Alimento.id == alimento_id).first()
     if not obj:
         raise HTTPException(status_code=404, detail="Alimento não encontrado.")
-    for field, value in body.dict(exclude_unset=True).items():
+    for field, value in _normalizar_peso(body.dict(exclude_unset=True)).items():
         setattr(obj, field, value)
     db.commit()
     db.refresh(obj)
@@ -174,3 +213,5 @@ def stats(db: Session = Depends(get_db)):
         total_desperdicio_kg=total_desperdicio_kg,
         desperdicio_por_dia=desperdicio_por_dia,
     )
+
+

@@ -9,16 +9,20 @@ import {
   deleteCardapioItem,
   getStats,
   createDesperdicio,
+  getAlimentos,
+  getFornecedores,
+  getReceitas,
 } from '../services/api'
-import type { CardapioItem, Stats } from '../types'
+import type { Alimento, CardapioItem, Fornecedor, Receita, Stats } from '../types'
 import './DashboardPage.css'
 
 const TIPO_LABELS: Record<string, string> = {
   cafe: 'Café da manhã',
   almoco: 'Almoço',
-  jantar: 'Jantar',
   lanche: 'Lanche',
+  jantar: 'Jantar',
 }
+const REFEICOES_ORDEM = ['cafe', 'almoco', 'lanche', 'jantar']
 
 function fmt(d: Date) {
   return d.toISOString().slice(0, 10)
@@ -34,6 +38,9 @@ export default function DashboardPage() {
   const selectedDate = new Date(dateParam + 'T00:00:00')
 
   const [items, setItems] = useState<CardapioItem[]>([])
+  const [alimentos, setAlimentos] = useState<Alimento[]>([])
+  const [receitas, setReceitas] = useState<Receita[]>([])
+  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [editing, setEditing] = useState<Record<number, string>>({})
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -46,9 +53,18 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setLoadingItems(true)
-    getCardapio(dateParam, dateParam)
-      .then(setItems)
-      .catch(() => setItems([]))
+    Promise.all([
+      getCardapio(dateParam, dateParam).catch(() => []),
+      getAlimentos().catch(() => []),
+      getReceitas().catch(() => []),
+      getFornecedores().catch(() => []),
+    ])
+      .then(([c, a, r, f]) => {
+        setItems(c)
+        setAlimentos(a)
+        setReceitas(r)
+        setFornecedores(f)
+      })
       .finally(() => setLoadingItems(false))
     getStats().then(setStats).catch(() => {})
   }, [dateParam])
@@ -144,38 +160,133 @@ export default function DashboardPage() {
           {/* Day header */}
           <h1 className="dash-day-title" style={{ textTransform: 'capitalize' }}>{dateLabel}</h1>
 
-          {/* Cardápio */}
+          {/* Cardápio e Estrutura Hierárquica */}
           <section className="dash-section">
             <h2 className="dash-section-title">Cardápio do dia</h2>
             {loadingItems && <p className="dash-muted">Carregando…</p>}
-            {!loadingItems && items.length === 0 && (
-              <p className="dash-muted">Nenhum item cadastrado para este dia.</p>
+            {!loadingItems && items.length === 0 && receitas.filter(r => !r.data || r.data === dateParam).length === 0 && (
+              <p className="dash-muted">Nenhum item ou receita cadastrado para este dia.</p>
             )}
+
             <div className="dash-items">
-              {items.map(item => (
-                <div key={item.id} className="dash-item-card">
-                  <div className="dash-item-header">
-                    <span className="dash-item-tipo">{TIPO_LABELS[item.tipo_refeicao] || item.tipo_refeicao}</span>
-                    <button className="btn btn-sm btn-ghost dash-item-del" onClick={() => handleDelete(item.id)}>🗑</button>
-                  </div>
-                  <textarea
-                    className="field-input dash-item-textarea"
-                    rows={2}
-                    value={editing[item.id] !== undefined ? editing[item.id] : item.descricao}
-                    onChange={e => setEditing(prev => ({ ...prev, [item.id]: e.target.value }))}
-                  />
-                  {editing[item.id] !== undefined && (
-                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
-                      <button className="btn btn-sm btn-primary" onClick={() => handleSave(item.id)}>Salvar</button>
-                      <button className="btn btn-sm btn-ghost"
-                        onClick={() => setEditing(prev => { const n = { ...prev }; delete n[item.id]; return n })}>
-                        Cancelar
-                      </button>
+              {REFEICOES_ORDEM.map(tipo => {
+                const itemsRef = items.filter(i => i.tipo_refeicao === tipo)
+                const receitasRef = receitas.filter(r => r.refeicao === tipo && (!r.data || r.data === dateParam))
+                if (itemsRef.length === 0 && receitasRef.length === 0) return null
+
+                return (
+                  <div key={tipo} className="dash-item-card">
+                    <div className="dash-item-header">
+                      <span className="dash-item-tipo"><strong>Refeição:</strong> {TIPO_LABELS[tipo]}</span>
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    {/* Receitas e Alimentos associados */}
+                    {receitasRef.map(rec => {
+                      const alims = alimentos.filter(a => a.receita_id === rec.id)
+                      return (
+                        <div key={`rec-${rec.id}`} className="dash-hierarchy-receita">
+                          <div className="dash-hierarchy-receita-title">• {rec.nome}</div>
+                          {alims.length > 0 && (
+                            <ul className="dash-hierarchy-alimentos">
+                              {alims.map(a => {
+                                const forn = fornecedores.find(f => f.id === a.fornecedor_id)?.nome
+                                const detalhes = [
+                                  forn ? `Fornecedor: ${forn}` : null,
+                                  a.peso_valor != null ? `Peso: ${a.peso_valor} ${a.peso_unidade || 'kg'}` : null,
+                                  a.quantidade != null ? `Qtd: ${a.quantidade}` : null,
+                                  a.data_vencimento ? `Vencimento: ${a.data_vencimento.split('-').reverse().join('/')}` : null,
+                                  ...Object.entries(a.extras || {}).map(([k, v]) => `${k}: ${v}`),
+                                ].filter(Boolean)
+                                return (
+                                  <li key={a.id} className="dash-hierarchy-alimento">
+                                    <strong>{a.nome}</strong>
+                                    {detalhes.length > 0 && (
+                                      <div className="dash-hierarchy-detalhes">{detalhes.join(' · ')}</div>
+                                    )}
+                                  </li>
+                                )
+                              })}
+                            </ul>
+                          )}
+                        </div>
+                      )
+                    })}
+
+                    {/* Itens avulsos do cardápio */}
+                    {itemsRef.map(item => (
+                      <div key={item.id} style={{ marginTop: '0.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                          <span className="dash-muted">Descrição do cardápio</span>
+                          <button className="btn btn-sm btn-ghost dash-item-del" onClick={() => handleDelete(item.id)}>🗑</button>
+                        </div>
+                        <textarea
+                          className="field-input dash-item-textarea"
+                          rows={2}
+                          value={editing[item.id] !== undefined ? editing[item.id] : item.descricao}
+                          onChange={e => setEditing(prev => ({ ...prev, [item.id]: e.target.value }))}
+                        />
+                        {editing[item.id] !== undefined && (
+                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                            <button className="btn btn-sm btn-primary" onClick={() => handleSave(item.id)}>Salvar</button>
+                            <button className="btn btn-sm btn-ghost"
+                              onClick={() => setEditing(prev => { const n = { ...prev }; delete n[item.id]; return n })}>
+                              Cancelar
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              })}
             </div>
+          </section>
+
+          {/* Tabela de Alimentos no Banco de Dados */}
+          <section className="dash-section">
+            <h2 className="dash-section-title">Alimentos Cadastrados</h2>
+            {alimentos.length === 0 ? (
+              <p className="dash-muted">Nenhum alimento cadastrado.</p>
+            ) : (
+              <div className="dash-table-wrap">
+                <table className="dash-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Alimento</th>
+                      <th>Fornecedor</th>
+                      <th>Peso</th>
+                      <th>Unidade</th>
+                      <th>Quantidade</th>
+                      <th>Data de Vencimento</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {alimentos.map(a => {
+                      const forn = fornecedores.find(f => f.id === a.fornecedor_id)?.nome ?? '—'
+                      return (
+                        <tr key={a.id}>
+                          <td>{a.id}</td>
+                          <td>
+                            <strong>{a.nome}</strong>
+                            {a.extras && Object.keys(a.extras).length > 0 && (
+                              <div className="dash-table-extras">
+                                {Object.entries(a.extras).map(([k, v]) => `${k}: ${v}`).join(' · ')}
+                              </div>
+                            )}
+                          </td>
+                          <td>{forn}</td>
+                          <td>{a.peso_valor ?? '—'}</td>
+                          <td>{a.peso_unidade ?? '—'}</td>
+                          <td>{a.quantidade ?? '—'}</td>
+                          <td>{a.data_vencimento ? a.data_vencimento.split('-').reverse().join('/') : '—'}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
 
           {/* Stats */}

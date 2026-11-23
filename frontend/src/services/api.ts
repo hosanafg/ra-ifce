@@ -1,4 +1,4 @@
-import type { Alimento, CardapioItem, Fornecedor, OcrResponse, Stats } from '../types'
+﻿import type { Alimento, CardapioItem, Fornecedor, OcrResponse, Receita, Stats } from '../types'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
@@ -7,8 +7,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   })
-  const data = await res.json()
-  if (!res.ok) throw { status: res.status, detail: data.detail ?? data }
+  const data = res.status === 204 ? null : await res.json().catch(() => null)
+  if (!res.ok) throw { status: res.status, detail: data?.detail ?? data ?? 'Erro na requisição.' }
   return data as T
 }
 
@@ -82,11 +82,13 @@ export const getAlimentos = () => request<Alimento[]>('/alimentos')
 export const createAlimento = (body: {
   nome: string
   fornecedor_id?: number
+  receita_id?: number
   peso_valor?: number
   peso_unidade?: string
   quantidade?: number
   data_vencimento?: string
   revisar?: boolean
+  extras?: Record<string, string>
 }) => request<Alimento>('/alimentos', { method: 'POST', body: JSON.stringify(body) })
 
 export const getFornecedores = () => request<Fornecedor[]>('/fornecedores')
@@ -105,14 +107,19 @@ export const createDesperdicio = (body: {
 }) => request<void>('/desperdicio', { method: 'POST', body: JSON.stringify(body) })
 
 /* ── OCR ── */
-export const uploadOCR = (file: File): Promise<OcrResponse> => {
+export const uploadOCR = async (file: File): Promise<OcrResponse> => {
   const form = new FormData()
   form.append('file', file)
-  return fetch(`${BASE_URL}/ocr/upload`, { method: 'POST', body: form })
-    .then(async res => {
-      const d = await res.json()
-      if (!res.ok) throw d
-      return d as OcrResponse
-    })
+  const res = await fetch(`${BASE_URL}/ocr/upload`, { method: 'POST', body: form })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw { status: res.status, detail: data.detail ?? 'Erro ao processar o documento.' }
+  return data as OcrResponse
 }
+
+
+/* ── Receitas ── */
+export const getReceitas = () => request<Receita[]>('/receitas')
+
+export const createReceita = (body: { nome: string; refeicao: string; data?: string }) =>
+  request<Receita>('/receitas', { method: 'POST', body: JSON.stringify(body) })
 

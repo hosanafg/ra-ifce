@@ -1,6 +1,7 @@
-from datetime import date, datetime
-from typing import Optional, List
+﻿from datetime import date, datetime
+from typing import Dict, Optional, List
 from pydantic import BaseModel
+
 
 # ── Fornecedor ────────────────────────────────────────────────────────────────
 
@@ -14,16 +15,34 @@ class FornecedorOut(BaseModel):
         orm_mode = True
 
 
+# ── Receita ───────────────────────────────────────────────────────────────────
+
+class ReceitaIn(BaseModel):
+    nome: str
+    refeicao: str            # "cafe", "almoco", "lanche", "jantar"
+    data: Optional[date] = None   # se informada, a receita também entra no cardápio do dia
+
+class ReceitaOut(BaseModel):
+    id: int
+    nome: str
+    refeicao: str
+    data: Optional[date] = None
+    class Config:
+        orm_mode = True
+
+
 # ── Alimento ──────────────────────────────────────────────────────────────────
 
 class AlimentoIn(BaseModel):
     nome: str
     fornecedor_id: Optional[int] = None
+    receita_id: Optional[int] = None
     peso_valor: Optional[float] = None
-    peso_unidade: Optional[str] = None
+    peso_unidade: Optional[str] = None       # "kg" ou "L"
     quantidade: Optional[int] = None
     data_vencimento: Optional[date] = None
     revisar: Optional[bool] = False
+    extras: Optional[Dict[str, str]] = None  # campos personalizados, ex.: {"Marca": "Tio João"}
 
 class AlimentoOut(AlimentoIn):
     id: int
@@ -40,11 +59,10 @@ class CardapioItemIn(BaseModel):
     descricao: str
 
 class CardapioItemUpdate(BaseModel):
-    """Schema para atualização parcial — apenas descricao obrigatória."""
+    """Atualização parcial — apenas descricao obrigatória."""
     descricao: str
     data: Optional[date] = None
     tipo_refeicao: Optional[str] = None
-
 
 class CardapioItemOut(CardapioItemIn):
     id: int
@@ -62,7 +80,7 @@ class LogDesperdicioIn(BaseModel):
 class LogDesperdicioOut(LogDesperdicioIn):
     id: int
     class Config:
-        orm_mode=True
+        orm_mode = True
 
 # ── Stats ─────────────────────────────────────────────────────────────────────
 

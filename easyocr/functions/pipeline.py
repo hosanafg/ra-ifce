@@ -1,10 +1,10 @@
-import logging
+﻿import logging
 from typing import List, Tuple
 
 from CONFIG import *
 from functions.loading import *
 from functions.ocr import ocr_imagem  
-from functions.parser import parse_linha, aplicar_validade_global
+from functions.parser import extrair_insumos, aplicar_validade_global
 from functions.pydantic_functions import InsumoExtraido, Alerta
 
 def ler_linhas(dados: bytes, nome: str) -> Tuple[List[Tuple[int, list]], List[Alerta]]:
@@ -42,39 +42,23 @@ def processar_documento(dados: bytes, nome: str) -> Tuple[List[InsumoExtraido], 
     """Etapa 1 + 2: arquivo -> insumos extraídos + alertas."""
     paginas, alertas = ler_linhas(dados, nome)
     insumos: List[InsumoExtraido] = []
+    contexto: dict = {}                      # refeição/receita/fornecedor atravessam as páginas
 
     for pagina, linhas in paginas:
-        novos = []
-        # for item in linhas:
-        #     logging.info(f"[p{pagina}] '{item['text']}' conf={item['conf']:.2f}")
-        #     ins = parse_linha(item)
-        #     if ins:
-        #         novos.append(ins)
-        #         if ins.revisar:
-        #             msg = f"Revisar: '{item['text']}' (conf={item['conf']:.2f})"
-        #             logging.warning(msg)
-        #             alertas.append(Alerta(codigo="BAIXA_CONFIANCA", mensagem=msg, pagina=pagina))
+        logging.info("--------------- OCR p%s -----------------", pagina)
         for item in linhas:
-            logging.info("--------------- OCR -----------------")
             logging.info(f"[p{pagina}] OCR: '{item['text']}' (conf={item['conf']:.2f})")
-            ins = parse_linha(item)
-            if ins:
-                logging.info(
-                    f"[p{pagina}] EXTRAÍDO -> ingrediente={ins.ingrediente!r} | "
-                    f"peso={ins.peso_valor}{ins.peso_unidade or ''} | qtd={ins.quantidade} | "
-                    f"validade={ins.data_vencimento} | revisar={ins.revisar}"
-                )
-                novos.append(ins)
-                if ins.revisar:
-                    msg = f"Revisar: '{item['text']}' (conf={item['conf']:.2f})"
-                    logging.warning(msg)
-                    alertas.append(Alerta(codigo="BAIXA_CONFIANCA", mensagem=msg, pagina=pagina))
-            else:
-                logging.info(f"[p{pagina}] ignorada (não parece um insumo)")
+
+        novos, contexto = extrair_insumos(linhas, contexto)
+        for ins in novos:
+            if ins.revisar:
+                msg = f"Revisar: '{ins.texto_original}' (conf={ins.confianca:.2f})"
+                logging.warning(msg)
+                alertas.append(Alerta(codigo="BAIXA_CONFIANCA", mensagem=msg, pagina=pagina))
         aplicar_validade_global(linhas, novos, alertas)
-        insumos+=novos
+        insumos += novos
 
     if not insumos and not any(a.codigo == "LEITURA_VAZIA" for a in alertas):
         alertas.append(Alerta(codigo="CAMPO_NAO_ENCONTRADO",
-                              mensagem="Nenhum insumo identificado no documento."))
+                              mensagem="Nenhum alimento identificado no documento."))
     return insumos, alertas

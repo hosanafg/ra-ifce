@@ -12,6 +12,20 @@ from app.routers import login, signup, reset, alimentos, ocr
 
 logging.basicConfig(level=logging.INFO)
 Base.metadata.create_all(engine)
+
+def _migrar_colunas() -> None:
+    """create_all não altera tabelas existentes: adiciona colunas novas se faltarem."""
+    from sqlalchemy import inspect, text
+    insp = inspect(engine)
+    if "alimentos" in insp.get_table_names():
+        cols = {c["name"] for c in insp.get_columns("alimentos")}
+        with engine.begin() as conn:
+            if "extras" not in cols:
+                conn.execute(text("ALTER TABLE alimentos ADD COLUMN extras JSON"))
+            if "receita_id" not in cols:
+                conn.execute(text("ALTER TABLE alimentos ADD COLUMN receita_id INTEGER REFERENCES receitas(id)"))
+
+_migrar_colunas()
 app = FastAPI(title="Auth API")
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
