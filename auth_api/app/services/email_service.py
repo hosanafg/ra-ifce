@@ -23,9 +23,9 @@ def send_code_email(to: str, code: str) -> None:
         s.send_message(msg)
 
 
-def send_reset_email(to: str, token: str, frontend_url: str = "http://localhost:5173") -> None:
+def send_reset_email(to: str, token: str, frontend_url: str = "") -> None:
     """Envia o link de redefinição de senha."""
-    link = f"{frontend_url}/nova-senha?token={token}"
+    link = f"{(frontend_url or config.FRONTEND_URL).rstrip('/')}/nova-senha?token={token}"
     if not config.SMTP_HOST:
         log.info("[DEV] Link de recuperação para %s: %s", to, link)
         return

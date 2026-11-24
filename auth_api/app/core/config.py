@@ -33,3 +33,8 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
 SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 SMTP_FROM = os.getenv("SMTP_FROM", "no-reply@example.com")
+
+# Frontend (CORS e link do e-mail de recuperação)
+CORS_ORIGINS = [o.strip() for o in os.getenv(
+    "CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",") if o.strip()]
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")

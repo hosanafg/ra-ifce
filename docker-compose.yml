@@ -1,0 +1,47 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: auth_backend
+    environment:
+      DATABASE_URL: sqlite:////data/app.db
+      PEPPER: ${PEPPER:-dev-pepper-troque-em-producao}
+      # Origens permitidas no CORS (separadas por vírgula)
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+      # URL pública do frontend usada no link de recuperação de senha
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      # SMTP: sem SMTP_HOST, os códigos/links aparecem nos logs do container
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-no-reply@example.com}
+    volumes:
+      - db_data:/data          # banco SQLite persistente
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    container_name: auth_frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:80"
+    restart: unless-stopped
+
+volumes:
+  db_data:

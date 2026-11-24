@@ -5,6 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.core import config
 from app.core.exceptions import AuthError
 from app.db import models  # noqa: F401  (registra os modelos antes do create_all)
 from app.db.session import Base, engine
@@ -32,7 +33,7 @@ app = FastAPI(title="Auth API")
 # Em produção, substitua "*" pela(s) origin(s) exata(s) do frontend.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=config.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

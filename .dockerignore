@@ -1,0 +1,14 @@
+**/__pycache__
+**/*.pyc
+**/node_modules
+**/dist
+**/.env
+**/.venv
+.git
+.vscode
+auth_api/app.db
+easyocr/logs
+easyocr/old
+easyocr/tests
+easyocr/__pycache__
+*.md
