@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-estoque_cozinha}
+      POSTGRES_USER: ${SUPABASE_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${SUPABASE_DB_PASSWORD:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SUPABASE_DB_USER:-postgres} -d ${POSTGRES_DB:-estoque_cozinha}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./estoque-cozinha
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SUPABASE_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-estoque_cozinha}
+      SUPABASE_DB_USER: ${SUPABASE_DB_USER:-postgres}
+      SUPABASE_DB_PASSWORD: ${SUPABASE_DB_PASSWORD:-postgres}
+      JWT_SECRET: ${JWT_SECRET:-uma-chave-aleatoria-com-mais-de-32-caracteres-aqui}
+      ADMIN_LOGIN: ${ADMIN_LOGIN:-admin}
+      ADMIN_SENHA: ${ADMIN_SENHA:-admin123}
+      REGISTRO_PUBLICO: ${REGISTRO_PUBLICO:-true}
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  pgdata:
