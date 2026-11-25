@@ -1,0 +1,9 @@
+target/
+node_modules/
+dist/
+.env
+*.local
+application-local.yml
+.idea/
+*.iml
+.DS_Store

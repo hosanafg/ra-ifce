@@ -1,0 +1,141 @@
+/* ============================================================
+   TEMA: Verde Musgo — claro e escuro (baseado em ra-ifce)
+   Fonte: "Nunito Sans" (similar a Helvética, livre e legível)
+   Contraste: WCAG AA+ para astigmatismo / baixa visão
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,400&display=swap');
+
+:root {
+  /* Verde musgo: escala */
+  --moss-50:  #f2f7f0;
+  --moss-100: #ddecd8;
+  --moss-200: #bcd9b2;
+  --moss-300: #90be83;
+  --moss-400: #67a056;
+  --moss-500: #4d8440;
+  --moss-600: #3c6b30;
+  --moss-700: #2f5424;
+  --moss-800: #25421b;
+  --moss-900: #1b3214;
+
+  /* Neutros cálidos (evita branco puro – melhor para astigmatismo) */
+  --warm-50:  #f7f7f4;
+  --warm-100: #eeede8;
+  --warm-200: #d9d8d1;
+  --warm-300: #b8b6ac;
+  --warm-700: #4a4844;
+  --warm-800: #2e2d2a;
+  --warm-900: #1a1917;
+
+  /* Semânticas — Modo Claro */
+  --bg-page:        var(--warm-50);
+  --bg-surface:     #ffffff;
+  --bg-surface-alt: var(--warm-100);
+  --bg-nav:         var(--moss-800);
+  --bg-nav-text:    var(--warm-50);
+
+  --text-primary:   var(--warm-800);
+  --text-secondary: var(--warm-700);
+  --text-muted:     #6b6966;
+  --text-inverse:   var(--warm-50);
+
+  --border-default: var(--warm-200);
+  --border-focus:   var(--moss-500);
+
+  --accent:         var(--moss-500);
+  --accent-hover:   var(--moss-600);
+  --accent-light:   var(--moss-100);
+  --accent-text:    var(--warm-50);
+
+  --error:          #c0392b;
+  --error-bg:       #fdf0ee;
+  --warning:        #9a6700;
+  --warning-bg:     #fff8e1;
+  --success:        var(--moss-600);
+  --success-bg:     var(--moss-50);
+
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.10);
+  --shadow-md:  0 4px 12px rgba(0,0,0,.12);
+
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  16px;
+
+  /* Tipografia */
+  --font-base: 'Nunito Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-size-sm: 0.9rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.4rem;
+  --font-size-2xl: 1.9rem;
+  --line-height: 1.6;
+  --letter-spacing: 0.012em;
+}
+
+/* ── Modo Escuro ── */
+[data-theme="dark"] {
+  --bg-page:        var(--warm-900);
+  --bg-surface:     #242320;
+  --bg-surface-alt: #2e2d2a;
+  --bg-nav:         #111110;
+  --bg-nav-text:    var(--moss-200);
+
+  --text-primary:   #e8e6e1;
+  --text-secondary: #c5c3bc;
+  --text-muted:     #9e9c96;
+  --text-inverse:   var(--warm-900);
+
+  --border-default: #3d3c38;
+  --border-focus:   var(--moss-400);
+
+  --accent:         var(--moss-400);
+  --accent-hover:   var(--moss-300);
+  --accent-light:   #2a3d24;
+  --accent-text:    var(--warm-900);
+
+  --error:          #e57373;
+  --error-bg:       #2c1a1a;
+  --warning:        #f5c542;
+  --warning-bg:     #33280a;
+  --success:        var(--moss-300);
+  --success-bg:     #1c2d18;
+
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.35);
+  --shadow-md:  0 4px 12px rgba(0,0,0,.45);
+}
+
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-base);
+  font-size: var(--font-size-base);
+  font-weight: 400;
+  line-height: var(--line-height);
+  letter-spacing: var(--letter-spacing);
+  color: var(--text-primary);
+  background-color: var(--bg-page);
+  transition: background-color .25s, color .25s;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:focus-visible {
+  outline: 3px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 600;
+}
+a:hover { color: var(--accent-hover); }

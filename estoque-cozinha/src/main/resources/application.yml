@@ -1,0 +1,27 @@
+spring:
+  profiles:
+    default: local
+  datasource:
+    url: ${SUPABASE_DB_URL}
+    username: ${SUPABASE_DB_USER}
+    password: ${SUPABASE_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update   # cria/atualiza as tabelas no Supabase. Em produção prefira Flyway.
+    properties:
+      hibernate.jdbc.time_zone: America/Fortaleza
+
+server:
+  port: ${PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}            # mínimo 32 caracteres
+    expiracao-minutos: 480
+  admin:
+    login: ${ADMIN_LOGIN:admin}
+    senha: ${ADMIN_SENHA}
+  registro-publico: ${REGISTRO_PUBLICO:true}   # false = só admin cria contas
